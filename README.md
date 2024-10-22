@@ -63,8 +63,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Download this project
 ```
-$ git clone https://github.com/MelissaData/PeopleBusinessSearch-Python3
-$ cd PeopleBusinessSearch-Python3
+git clone https://github.com/MelissaData/PeopleBusinessSearch-Python3
+cd PeopleBusinessSearch-Python3
 ```
 
 ## Windows
@@ -110,15 +110,15 @@ There are two modes:
 
 	The script will prompt the user for input(s), then use the provided input(s) to call the Cloud API. For example:
 	```
-	$ .\PeopleBusinessSearchPython3.ps1
+	.\PeopleBusinessSearchPython3.ps1
 	```
 
 - Command Line 
 
 	You can pass a maxrecords, matchlevel, addressline1, locality, administrativearea, postal, anyname and a license string into `-maxrecords`, `-matchlevel`, `-addressline1`, `-locality`, `-administrativearea`, `-postal`, `-anyname` and `-license` parameters respectively to test the Cloud API. For example:
 	```
-    $ .\PeopleBusinessSearchPython3.ps1 -maxrecords "10" -matchlevel "10" -addressline1 "22382 Avenida Empresa" -locality "Rancho Santa Margarita" -administrativearea "CA" -postal "92688" -anyname "Melissa Data" -license "<your_license_string>"
-    $ .\PeopleBusinessSearchPython3.ps1 -license "<your_license_string>"
+    .\PeopleBusinessSearchPython3.ps1 -maxrecords "10" -matchlevel "10" -addressline1 "22382 Avenida Empresa" -locality "Rancho Santa Margarita" -administrativearea "CA" -postal "92688" -anyname "Melissa Data" -license "<your_license_string>"
+    .\PeopleBusinessSearchPython3.ps1 -license "<your_license_string>"
     ```
 
 This is the sample output from a successful setup for interactive mode:
@@ -175,15 +175,15 @@ There are two modes:
 
 	The script will prompt the user for input(s), then use the provided input(s) to call the Cloud API. For example:
 	```
-	$ ./PeopleBusinessSearchPython3.sh
+	./PeopleBusinessSearchPython3.sh
 	```
 
 - Command Line 
 
 	You can pass a pafid, company, full name, address line 1, city, state, postal code, country, and a license string into `--maxrecords`, `--matchlevel`, `--addressline1`, `--locality`, `--administrativearea`, `--postal`, `--anyname` and `--license` parameters respectively to test the Cloud API. For example:
 	```
-    $ ./PeopleBusinessSearchPython3.sh --maxrecords "10" --matchlevel "10" --addressline1 "22382 Avenida Empresa" --locality "Rancho Santa Margita" --administrativearea "CA" --postal "92688" --anyname "Melissa Data" --license "<your_license_string>"
-    $ ./PeopleBusinessSearchPython3.sh --license "<your_license_string>"
+    ./PeopleBusinessSearchPython3.sh --maxrecords "10" --matchlevel "10" --addressline1 "22382 Avenida Empresa" --locality "Rancho Santa Margita" --administrativearea "CA" --postal "92688" --anyname "Melissa Data" --license "<your_license_string>"
+    ./PeopleBusinessSearchPython3.sh --license "<your_license_string>"
     ```
 
 This is the sample output from a successful setup for interactive mode:
