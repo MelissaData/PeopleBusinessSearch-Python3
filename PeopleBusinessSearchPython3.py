@@ -1,3 +1,23 @@
+"""
+People Business Search finds people and businesses at an address and/or by name,
+returning the matching records with their standardized address, Melissa Address Key,
+company names, Melissa Enterprise Key, and phone numbers.
+
+High-level flow of this sample:
+  1. ARGS    - main reads any --flag values off the command line with argparse.
+  2. INPUT   - call_api fills in whatever wasn't supplied via interactive prompts.
+  3. REQUEST - call_api builds the REST query string (license + input fields).
+  4. CALL    - get_contents issues the GET request and pretty-prints the JSON response.
+
+This sample is a thin HTTP client: it builds a query string, sends a GET request to
+the People Business Search Cloud API, and prints the JSON response.
+
+Reference:
+  - Documentation: https://docs.melissa.com/cloud-api/people-business-search/people-business-search-index.html
+  - Release notes: https://releasenotes.melissa.com/cloud-api/people-business-search/
+  - Result codes:  https://docs.melissa.com/melissa/result-codes/result-codes-index.html
+"""
+
 import json
 from threading import local
 import requests
@@ -5,6 +25,15 @@ import argparse
 import urllib.parse
 
 def main():
+  """
+  Entry point. Reads the optional command-line arguments, then hands control to
+  call_api, which performs the actual request/response cycle.
+
+  Recognized flags (each followed by its value, e.g. --anyname "Melissa Data"):
+  --license/-l, --maxrecords, --matchlevel, --addressline1, --locality,
+  --administrativearea, --postal, --anyname.
+  Any flag not supplied is None, and call_api prompts for it interactively.
+  """
   base_service_url = "https://search.melissadata.net/"
   service_endpoint = "v5/web/contactsearch/docontactSearch"
 
@@ -34,11 +63,22 @@ def main():
   postal = args.postal
   anyname = args.anyname
 
+  # Run the search with whatever values were passed on the command line.
   call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel, addressline1, locality, administrativearea, postal, anyname)
 
 def get_contents(base_service_url, request_query):
+    """
+    Issues the GET request against the People Business Search endpoint and
+    pretty-prints the API call and the JSON response to the console.
+
+    Args:
+        base_service_url: The People Business Search Cloud API base URL.
+        request_query: The endpoint path plus query string built by call_api.
+    """
     url = urllib.parse.urljoin(base_service_url, request_query)
     response = requests.get(url)
+
+    # Re-serialize with indentation so the raw response is easier to read.
     obj = json.loads(response.text)
     pretty_response = json.dumps(obj, indent=4)
 
@@ -54,6 +94,26 @@ def get_contents(base_service_url, request_query):
     print(pretty_response)
 
 def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel, addressline1, locality, administrativearea, postal, anyname):
+    """
+    Drives the interactive/CLI loop: gathers the search fields, builds and submits
+    the REST query, prints the result, and optionally repeats for another record.
+
+    It runs a single pass and exits only when every search field was supplied on the
+    command line. Otherwise it loops, asking for a new record each pass until the user
+    answers "N".
+
+    Args:
+        base_service_url: The People Business Search Cloud API base URL.
+        service_endpoint: The specific People Business Search endpoint path to call.
+        license: The Melissa license string sent with every request.
+        maxrecords: The maximum number of records to return, or None to prompt for it.
+        matchlevel: The match level to search with, or None to prompt for it.
+        addressline1: A street address to search, or None to prompt for it.
+        locality: A locality (city) to search, or None to prompt for it.
+        administrativearea: An administrative area (state) to search, or None to prompt for it.
+        postal: A postal code to search, or None to prompt for it.
+        anyname: A person or business name to search, or None to prompt for it.
+    """
     print("\n================= WELCOME TO MELISSA PEOPLE BUSINESS SEARCH CLOUD API =================\n")
 
     should_continue_running = True
@@ -65,6 +125,8 @@ def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel
         input_administrativearea = ""
         input_postal = ""
         input_any_name = ""
+
+        # No search values were supplied via command line, so prompt for every field.
         if not maxrecords and not matchlevel and not addressline1 and not locality and not administrativearea and not postal and not anyname:
             print("\nFill in each value to see results")
             input_max_records = input("Max Records: ")
@@ -75,6 +137,7 @@ def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel
             input_postal = input("Postal: ")
             input_any_name = input("Any Name: ")
         else:
+            # At least one search field was supplied via command line; use those values as-is.
             input_max_records = maxrecords
             input_match_level = matchlevel
             input_addressline1 = addressline1
@@ -83,6 +146,7 @@ def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel
             input_postal = postal
             input_any_name = anyname
 
+        # Prompt individually for any still-missing required field (all seven are required).
         while not input_max_records or not input_match_level or not input_addressline1 or not input_locality or not input_administrativearea or not input_postal or not input_any_name:
             print("\nFill in each value to see results")
             if not input_max_records:
@@ -100,6 +164,8 @@ def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel
             if not input_any_name:
                 input_any_name = input("\nAny Name: ")
 
+        # Map input fields to the API's expected query parameter names and
+        # request a JSON response.
         inputs = {
             "format": "json",
             "maxrecords": input_max_records,
@@ -149,6 +215,8 @@ def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel
 
         is_valid = False;
 
+        # If every search field came from the command line, treat this as a one-shot
+        # run rather than looping for additional records.
         if (maxrecords is not None) and (matchlevel is not None) and (addressline1 is not None) and (locality is not None) and (administrativearea is not None) and (postal is not None) and (anyname is not None):
             inputline = maxrecords + matchlevel + addressline1 + locality + administrativearea + postal + anyname
         else:
@@ -158,6 +226,8 @@ def call_api(base_service_url, service_endpoint, license, maxrecords, matchlevel
             is_valid = True
             should_continue_running = False
 
+        # Otherwise ask whether to test another record. Keep prompting until we get a
+        # valid Y/N. "N" ends the program; "Y" falls through to another pass.
         while not is_valid:
             test_another_response = input("\nTest another record? (Y/N)")
             if test_another_response != '':
